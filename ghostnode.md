@@ -98,3 +98,5 @@ System is considered ready when:
 - Codex returns a response
 - Response is logged in Fibery
 - All logic is managed in GitHub and Replit
+
+- Testing pull
