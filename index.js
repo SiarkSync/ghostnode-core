@@ -13,38 +13,40 @@ process.on("unhandledRejection", (reason, promise) => {
 
 app.use(express.json());
 
-// Utility: verify GitHub HMAC signature
+// Verify GitHub webhook signature
 function verifySignature(req) {
-  const sig = req.headers["x-hub-signature-256"];
-  if (!sig) return false;
+  const signature = req.headers["x-hub-signature-256"];
+  if (!signature) return false;
   const hmac = crypto.createHmac("sha256", WEBHOOK_SECRET);
   const digest = "sha256=" + hmac.update(JSON.stringify(req.body)).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(digest));
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
 app.post("/webhook", (req, res) => {
+  // Check signature
   if (!verifySignature(req)) {
-    console.warn("⚠️  Invalid webhook signature");
+    console.warn("⚠️ Invalid webhook signature");
     return res.status(401).send("Invalid signature");
   }
 
-  // Pull the latest code from main
+  // Attempt to pull latest from GitHub
   exec("git pull origin main", (err, stdout, stderr) => {
     if (err) {
-      console.error("❌ git pull error:", stderr);
-      return res.status(500).send("Git pull failed");
+      console.error("❌ Git pull failed:", stderr);
+      // Return the full stderr so we can debug
+      return res.status(500).send(`Git pull failed: ${stderr}`);
     }
-    console.log("✅ git pull output:\n", stdout);
+    console.log("✅ Git pull output:\n", stdout);
 
-    // Install dependencies if needed
+    // Reinstall dependencies if needed
     exec("npm install", (err2, out2, stderr2) => {
       if (err2) {
         console.error("❌ npm install error:", stderr2);
-        // Still return success so webhook won't retry
+        // Return success so GitHub stops retrying
         return res.status(200).send("Pulled, but npm install failed");
       }
       console.log("✅ npm install output:\n", out2);
-      res.status(200).send("✅ Repo updated and deps installed");
+      return res.status(200).send("✅ Repo updated and deps installed");
     });
   });
 });
