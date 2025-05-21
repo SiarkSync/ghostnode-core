@@ -21,3 +21,5 @@ Build a system that accepts prompts via app → routes them to Codex → pushes 
 ➡️ Full system documentation in [`ghostnode.md`](./ghostnode.md)
 
 Testing replit auto sync
+
+t2
