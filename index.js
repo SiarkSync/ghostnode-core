@@ -1,8 +1,14 @@
+
 import express from "express";
 import { exec } from "child_process";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 app.use(express.json());
 
@@ -21,6 +27,6 @@ app.get("/", (req, res) => {
   res.send("✅ GhostNode webhook server is running.");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
