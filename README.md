@@ -19,3 +19,5 @@
 Build a system that accepts prompts via app → routes them to Codex → pushes to GitHub → pulls into Replit → logs to Fibery → loops back for human approval and further action.
 
 ➡️ Full system documentation in [`ghostnode.md`](./ghostnode.md)
+
+Testing replit auto sync
